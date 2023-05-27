@@ -2,16 +2,17 @@
 // Use of this source code is governed by a MIT-style
 // license that can be found in the LICENSE file.
 
-package concurrent
+package concurrent_test
 
 import (
+	"hybscloud.com/concurrent"
 	"testing"
 	"unsafe"
 )
 
 func TestDoubleUint64(t *testing.T) {
 	for i := 0; i < 1<<16; i++ {
-		u128 := DoubleUint64(1, 2)
+		u128 := concurrent.DoubleUint64(1, 2)
 		addr := unsafe.Pointer(&u128[0])
 		if uintptr(addr)&0xf > 0 {
 			t.Errorf("address of u128 not 16-bytes aligned")
