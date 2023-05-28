@@ -1,11 +1,28 @@
-## concurrent(WIP)
+## concurrent
 
 Concurrent is a library of lock-free and wait-free algorithms 
-(work in progress)
 
 ### Environment Requirements
 
 Currently only supporting amd64 architecture
+
+### Basic Usage
+```golang
+c, p := concurrent.NewMPMCQueue[int](1024)
+i := 100
+err := p.Enqueue(&i)
+if err != nil {
+	return err
+}
+res, err := c.Dequeue()
+if err != nil {
+	return err
+}
+println(res)
+```
+
+### Next Step
+Implement the sCQ lock-free FIFO queue
 
 ### References
 * [Combined Volume Set of Intel® 64 and IA-32 Architectures Software Developer’s Manuals](https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html)
