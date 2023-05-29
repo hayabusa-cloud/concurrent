@@ -5,6 +5,7 @@
 package concurrent
 
 import (
+	"golang.org/x/sys/cpu"
 	"sync/atomic"
 )
 
@@ -13,6 +14,7 @@ type poster struct {
 	order    int
 	capacity uint64
 	offers   atomic.Uint64
+	_        cpu.CacheLinePad
 	polls    atomic.Uint64
 }
 
