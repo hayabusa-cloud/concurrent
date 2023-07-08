@@ -18,3 +18,12 @@ func DoubleUint64(first, second uint64) (u128 []uint64) {
 
 	return unsafe.Slice((*uint64)(addr), 2)
 }
+
+// DoubleUintPtr creates and returns []uintptr with size 2 and the given values
+// the address of dw will be 16-bytes aligned
+func DoubleUintPtr(first, second uintptr) (dw []uintptr) {
+	u128 := DoubleUint64(uint64(first), uint64(second))
+	addr := unsafe.Pointer(&u128[0])
+
+	return unsafe.Slice((*uintptr)(addr), 2)
+}

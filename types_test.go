@@ -24,3 +24,18 @@ func TestDoubleUint64(t *testing.T) {
 		}
 	}
 }
+
+func TestDoubleUintPtr(t *testing.T) {
+	for i := 0; i < 1<<16; i++ {
+		dw := concurrent.DoubleUintPtr(1, 2)
+		addr := unsafe.Pointer(&dw[0])
+		if uintptr(addr)&0xf > 0 {
+			t.Errorf("address of dw not 16-bytes aligned")
+			return
+		}
+		if dw[0] != 1 || dw[1] != 2 {
+			t.Errorf("bad dw value expected %v but got %v", [2]uint64{1, 2}, dw)
+			return
+		}
+	}
+}
