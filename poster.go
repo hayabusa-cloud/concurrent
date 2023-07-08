@@ -21,7 +21,7 @@ type poster struct {
 const posterNilFlag = 1 << 63
 
 func newPoster(order int) *poster {
-	if order < 1 || order > 24 {
+	if order < 1 || order > 30 {
 		panic("bad capacity order")
 	}
 	ret := &poster{
