@@ -5,7 +5,6 @@
 package concurrent
 
 import (
-	"time"
 	"unsafe"
 )
 
@@ -91,12 +90,11 @@ func (q *MPMCQueue[T]) Dequeue() (elem *T, err error) {
 // EnqueueWait pushes the given item to a fifo queue.
 // the operation will block until success or error occurred
 func EnqueueWait[T any](p Producer[T], elem *T) error {
-	for i := uint8(0); ; i++ {
+	sw := SpinWait{}
+	for {
 		err := p.Enqueue(elem)
 		if err == ErrTemporaryUnavailable {
-			if i == 0xff {
-				time.Sleep(time.Millisecond)
-			}
+			sw.Once()
 			continue
 		}
 
@@ -107,12 +105,11 @@ func EnqueueWait[T any](p Producer[T], elem *T) error {
 // DequeueWait pops items from fifo queue.
 // the operation will block until
 func DequeueWait[T any](c Consumer[T]) (elem *T, err error) {
-	for i := uint8(0); ; i++ {
+	sw := SpinWait{}
+	for {
 		elem, err = c.Dequeue()
 		if err == ErrTemporaryUnavailable {
-			if i == 0xff {
-				time.Sleep(time.Millisecond)
-			}
+			sw.Once()
 			continue
 		}
 
