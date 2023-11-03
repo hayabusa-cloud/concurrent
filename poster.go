@@ -10,15 +10,20 @@ import (
 )
 
 type poster struct {
-	entries  []uintptr
-	order    int
-	capacity uint64
-	offers   atomic.Uint64
-	_        cpu.CacheLinePad
-	polls    atomic.Uint64
+	entries   []uintptr
+	order     int
+	capacity  uint64
+	indexSkip uint64
+	offers    atomic.Uint64
+	_         cpu.CacheLinePad
+	polls     atomic.Uint64
 }
 
-const posterNilFlag = 1 << 63
+const (
+	posterNilFlag    = 1 << 63
+	posterModuleBit  = 6
+	posterModuleMask = (1 << posterModuleBit) - 1
+)
 
 func newPoster(order int) *poster {
 	if order < 1 || order > 30 {
@@ -28,6 +33,8 @@ func newPoster(order int) *poster {
 		order:    order,
 		capacity: 1 << order,
 	}
+	ret.indexSkip = 1 << max(0, ret.order-posterModuleBit)
+
 	ret.entries = make([]uintptr, ret.capacity)
 	nil0 := uintptr(posterNilFlag | 0)
 	for i := 0; i < len(ret.entries); i++ {
@@ -47,8 +54,9 @@ func (po *poster) offer(elem uintptr) bool {
 			return false
 		}
 		i := o & (po.capacity - 1)
+		entry := po.entry(i)
 		round := (o >> po.order) & (posterNilFlag - 1)
-		success := atomic.CompareAndSwapUintptr(&po.entries[i], posterNilFlag|uintptr(round), elem)
+		success := atomic.CompareAndSwapUintptr(&po.entries[entry], posterNilFlag|uintptr(round), elem)
 		po.offers.CompareAndSwap(o, o+1)
 
 		if success {
@@ -61,22 +69,28 @@ func (po *poster) poll() (elem uintptr, ok bool) {
 	for {
 		p, o := po.polls.Load(), po.offers.Load()
 		i := p & (po.capacity - 1)
-		e := po.entries[i]
 		if p != po.polls.Load() {
 			continue
 		}
 		if p == o {
 			return 0, false
 		}
+		entry := po.entry(i)
+		e := po.entries[entry]
 		nextRound := uintptr((p>>po.order)+1) & (posterNilFlag - 1)
 		if e == posterNilFlag|nextRound {
 			po.polls.CompareAndSwap(p, p+1)
 			continue
 		}
-		success := atomic.CompareAndSwapUintptr(&po.entries[i], e, posterNilFlag|nextRound)
+		success := atomic.CompareAndSwapUintptr(&po.entries[entry], e, posterNilFlag|nextRound)
 		po.polls.CompareAndSwap(p, p+1)
 		if success {
 			return e, true
 		}
 	}
+}
+
+func (po *poster) entry(index uint64) uint64 {
+	p, q := index>>posterModuleBit, index&posterModuleMask
+	return q*po.indexSkip + p
 }
