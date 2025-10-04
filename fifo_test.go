@@ -5,13 +5,14 @@
 package concurrent_test
 
 import (
-	"hybscloud.com/concurrent"
 	"math"
 	"sync"
 	"testing"
+
+	"hybscloud.com/concurrent"
 )
 
-func TestMPMCQueuePOSTER(t *testing.T) {
+func TestMPMCQueueRmfLF(t *testing.T) {
 	t.Run("basic usage", func(t *testing.T) {
 		c, p := concurrent.NewMPMCQueue[int](1024)
 		i := 100
@@ -132,103 +133,103 @@ func TestMPMCQueuePOSTER(t *testing.T) {
 		}
 	})
 
-	const defaultCapacity = 1 << 12
+	const defaultCapacity = 1 << 14
 	t.Run("1 consumer 1 producer", func(t *testing.T) {
 		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
-		testMPMCQueuePOSTER(t, c, p, 1, 1)
+		testMPMCQueueRmfLF(t, c, p, 1, 1)
 	})
 
 	t.Run("1 consumer 4 producers", func(t *testing.T) {
 		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
-		testMPMCQueuePOSTER(t, c, p, 1, 4)
+		testMPMCQueueRmfLF(t, c, p, 1, 4)
 	})
 
 	t.Run("1 consumer 16 producers", func(t *testing.T) {
 		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
-		testMPMCQueuePOSTER(t, c, p, 1, 16)
+		testMPMCQueueRmfLF(t, c, p, 1, 16)
 	})
 
 	t.Run("4 consumers 1 producer", func(t *testing.T) {
 		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
-		testMPMCQueuePOSTER(t, c, p, 4, 1)
+		testMPMCQueueRmfLF(t, c, p, 4, 1)
 	})
 
 	t.Run("4 consumers 4 producers", func(t *testing.T) {
 		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
-		testMPMCQueuePOSTER(t, c, p, 4, 4)
+		testMPMCQueueRmfLF(t, c, p, 4, 4)
 	})
 
 	t.Run("4 consumers 16 producers", func(t *testing.T) {
 		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
-		testMPMCQueuePOSTER(t, c, p, 4, 16)
+		testMPMCQueueRmfLF(t, c, p, 4, 16)
 	})
 
 	t.Run("16 consumers 1 producer", func(t *testing.T) {
 		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
-		testMPMCQueuePOSTER(t, c, p, 16, 1)
+		testMPMCQueueRmfLF(t, c, p, 16, 1)
 	})
 
 	t.Run("16 consumers 4 producers", func(t *testing.T) {
 		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
-		testMPMCQueuePOSTER(t, c, p, 16, 4)
+		testMPMCQueueRmfLF(t, c, p, 16, 4)
 	})
 
 	t.Run("16 consumers 16 producers", func(t *testing.T) {
 		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
-		testMPMCQueuePOSTER(t, c, p, 16, 16)
+		testMPMCQueueRmfLF(t, c, p, 16, 16)
 	})
 }
 
-func BenchmarkMPMCQueuePOSTER(b *testing.B) {
+func BenchmarkMPMCQueueRmfLF(b *testing.B) {
 	const defaultCapacity = 1 << 16
 
 	b.Run("1 consumer 1 producer", func(b *testing.B) {
 		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
-		benchmarkMPMCQueuePOSTER(b, c, p, 1, 1)
+		benchmarkMPMCQueueRmfLF(b, c, p, 1, 1)
 	})
 
 	b.Run("1 consumer 4 producers", func(b *testing.B) {
 		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
-		benchmarkMPMCQueuePOSTER(b, c, p, 1, 4)
+		benchmarkMPMCQueueRmfLF(b, c, p, 1, 4)
 	})
 
 	b.Run("1 consumer 16 producers", func(b *testing.B) {
 		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
-		benchmarkMPMCQueuePOSTER(b, c, p, 1, 16)
+		benchmarkMPMCQueueRmfLF(b, c, p, 1, 16)
 	})
 
 	b.Run("4 consumers 1 producer", func(b *testing.B) {
 		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
-		benchmarkMPMCQueuePOSTER(b, c, p, 4, 1)
+		benchmarkMPMCQueueRmfLF(b, c, p, 4, 1)
 	})
 
 	b.Run("4 consumers 4 producers", func(b *testing.B) {
 		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
-		benchmarkMPMCQueuePOSTER(b, c, p, 4, 4)
+		benchmarkMPMCQueueRmfLF(b, c, p, 4, 4)
 	})
 
 	b.Run("4 consumers 16 producers", func(b *testing.B) {
 		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
-		benchmarkMPMCQueuePOSTER(b, c, p, 4, 16)
+		benchmarkMPMCQueueRmfLF(b, c, p, 4, 16)
 	})
 
 	b.Run("16 consumers 1 producer", func(b *testing.B) {
 		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
-		benchmarkMPMCQueuePOSTER(b, c, p, 16, 1)
+		benchmarkMPMCQueueRmfLF(b, c, p, 16, 1)
 	})
 
 	b.Run("16 consumers 4 producers", func(b *testing.B) {
 		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
-		benchmarkMPMCQueuePOSTER(b, c, p, 16, 4)
+		benchmarkMPMCQueueRmfLF(b, c, p, 16, 4)
 	})
 
 	b.Run("16 consumers 16 producers", func(b *testing.B) {
 		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
-		benchmarkMPMCQueuePOSTER(b, c, p, 16, 16)
+		benchmarkMPMCQueueRmfLF(b, c, p, 16, 16)
 	})
 }
 
-func testMPMCQueuePOSTER(t *testing.T, c concurrent.Consumer[int64], p concurrent.Producer[int64], cn, pn int) {
+func testMPMCQueueRmfLF(t *testing.T, c concurrent.Consumer[int64], p concurrent.Producer[int64], cn, pn int) {
 	n := 1 << 12
 	for i := 0; i < pn; i++ {
 		go func(i int) {
@@ -269,7 +270,7 @@ func testMPMCQueuePOSTER(t *testing.T, c concurrent.Consumer[int64], p concurren
 	wg.Wait()
 }
 
-func benchmarkMPMCQueuePOSTER(b *testing.B, c concurrent.Consumer[int64], p concurrent.Producer[int64], cn, pn int) {
+func benchmarkMPMCQueueRmfLF(b *testing.B, c concurrent.Consumer[int64], p concurrent.Producer[int64], cn, pn int) {
 	for i := 0; i < pn; i++ {
 		go func(i int) {
 			for j := 0; j < (b.N+cn)/pn+1; j++ {

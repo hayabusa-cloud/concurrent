@@ -8,15 +8,6 @@ import (
 	"unsafe"
 )
 
-const (
-	// FIFOQueueSCQ specifies that use sCQ implement
-	// https://drops.dagstuhl.de/opus/volltexte/2019/11335/pdf/LIPIcs-DISC-2019-28.pdf
-	FIFOQueueSCQ = iota
-	// FIFOQueuePOSTER specifies that use POSTER implement
-	// https://nikitakoval.org/publications/ppopp20-queues.pdf
-	FIFOQueuePOSTER
-)
-
 // SPSCQueue represents simple producer single consumer FIFO queue
 type SPSCQueue[T any] struct{}
 
@@ -46,7 +37,7 @@ func NewSPMCQueue[T any](capacity int) (Consumer[T], Producer[T]) {
 
 // MPMCQueue represents multiple producers multiple consumers FIFO queue
 type MPMCQueue[T any] struct {
-	*poster
+	*rmfLF
 }
 
 // NewMPMCQueue creates a new multiple producers multiple consumers
@@ -61,7 +52,7 @@ func NewMPMCQueue[T any](capacity int) (Consumer[T], Producer[T]) {
 		order++
 		capacity >>= 1
 	}
-	q := MPMCQueue[T]{poster: newPoster(order)}
+	q := MPMCQueue[T]{rmfLF: newRmfLF(order)}
 
 	return &q, &q
 }
