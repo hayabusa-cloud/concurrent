@@ -5,13 +5,13 @@
 package concurrent
 
 import (
+	"runtime"
 	"time"
 	_ "unsafe"
 )
 
 const (
-	procYieldCycles       = 16
-	spinWaitSleepDuration = 10 * time.Microsecond
+	spinWaitSleepDuration = 100 * time.Microsecond
 )
 
 // SpinWait is a lightweight synchronization type that
@@ -29,7 +29,7 @@ func (s *SpinWait) Once() {
 		time.Sleep(spinWaitSleepDuration)
 		return
 	}
-	procyield(procYieldCycles)
+	runtime.Gosched()
 }
 
 // WillYield returns true if calling SpinOnce() will result
@@ -47,6 +47,3 @@ func (s *SpinWait) Reset() {
 	s.counter = 0
 	s.n = 0
 }
-
-//go:linkname procyield runtime.procyield
-func procyield(cycles uint32)
