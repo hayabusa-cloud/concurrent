@@ -70,14 +70,14 @@ func (lf *rmfLF) poll() (elem uintptr, ok bool) {
 	for {
 		p, o := lf.polls.Load(), lf.offers.Load()
 		i := p & (lf.capacity - 1)
+		entry := lf.entry(i)
+		e := atomic.LoadUintptr(&lf.entries[entry])
 		if p != lf.polls.Load() {
 			continue
 		}
 		if p == o {
 			return 0, false
 		}
-		entry := lf.entry(i)
-		e := lf.entries[entry]
 		nextRound := uintptr((p>>lf.order)+1) & (rmfLFNilFlag - 1)
 		if e == rmfLFNilFlag|nextRound {
 			lf.polls.CompareAndSwap(p, p+1)
