@@ -6,12 +6,7 @@ package concurrent
 
 import (
 	"runtime"
-	"time"
 	_ "unsafe"
-)
-
-const (
-	spinWaitSleepDuration = 100 * time.Microsecond
 )
 
 // SpinWait is a lightweight synchronization type that
@@ -26,10 +21,10 @@ func (s *SpinWait) Once() {
 	s.counter++
 	if s.WillYield() {
 		s.n++
-		time.Sleep(spinWaitSleepDuration)
+		runtime.Gosched()
 		return
 	}
-	runtime.Gosched()
+	pause(20)
 }
 
 // WillYield returns true if calling SpinOnce() will result
