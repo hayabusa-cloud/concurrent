@@ -27,3 +27,5 @@ func DoubleUintPtr(first, second uintptr) (dw []uintptr) {
 
 	return unsafe.Slice((*uintptr)(addr), 2)
 }
+
+type noCopy struct{}
