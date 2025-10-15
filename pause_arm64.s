@@ -14,11 +14,8 @@ TEXT ·pause1(SB), NOSPLIT, $0-0
 // func pauseN(cycles int)
 TEXT ·pauseN(SB), NOSPLIT, $0-8
 	MOVD cycles+0(FP), R0
-	CMP $0, R0
-	BLE done
 loop:
 	YIELD
 	SUB $1, R0, R0
 	CBNZ R0, loop
-done:
 	RET

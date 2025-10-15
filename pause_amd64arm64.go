@@ -13,7 +13,9 @@ func pause1()
 func pauseN(cycles int)
 
 func pause(cycles int) {
-	if cycles == 1 {
+	if cycles < 1 {
+		return
+	} else if cycles == 1 {
 		pause1()
 	} else {
 		pauseN(cycles)

@@ -14,11 +14,8 @@ TEXT ·pause1(SB), NOSPLIT, $0-0
 // func pauseN(cycles int)
 TEXT ·pauseN(SB), NOSPLIT, $0-8
 	MOVQ cycles+0(FP), CX
-	TESTQ CX, CX
-	JLE done
 loop:
 	PAUSE
 	DECQ CX
 	JNZ loop
-done:
 	RET
