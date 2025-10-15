@@ -24,7 +24,7 @@ var (
 //	Pause(1)    // 1 cycle
 //	Pause(40)   // 40 cycles
 func Pause(cycles ...int) {
-	n := 20
+	n := defaultPauseCycles
 	if len(cycles) > 0 && cycles[0] > 0 {
 		n = cycles[0]
 	}
