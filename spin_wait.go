@@ -24,7 +24,7 @@ func (s *SpinWait) Once() {
 		runtime.Gosched()
 		return
 	}
-	pause(20)
+	pauseN(defaultPauseCycles)
 }
 
 // WillYield returns true if calling SpinOnce() will result
