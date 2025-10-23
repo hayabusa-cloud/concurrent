@@ -46,7 +46,8 @@ func newRmfLF(order int) *rmfLF {
 }
 
 func (lf *rmfLF) offer(elem uintptr) bool {
-	for {
+	sw := SpinWait{}
+	for ; ; sw.Once() {
 		o, p := lf.offers.Load(), lf.polls.Load()
 		if o != lf.offers.Load() {
 			continue
@@ -67,7 +68,8 @@ func (lf *rmfLF) offer(elem uintptr) bool {
 }
 
 func (lf *rmfLF) poll() (elem uintptr, ok bool) {
-	for {
+	sw := SpinWait{}
+	for ; ; sw.Once() {
 		p, o := lf.polls.Load(), lf.offers.Load()
 		i := p & (lf.capacity - 1)
 		entry := lf.entry(i)
