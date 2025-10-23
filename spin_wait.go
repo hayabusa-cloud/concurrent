@@ -6,6 +6,7 @@ package concurrent
 
 import (
 	"runtime"
+	"time"
 	_ "unsafe"
 )
 
@@ -41,4 +42,28 @@ func (s *SpinWait) WillYield() bool {
 func (s *SpinWait) Reset() {
 	s.counter = 0
 	s.n = 0
+}
+
+var yieldDuration = 250 * time.Microsecond
+
+// Yield yields the processor by sleeping for a duration based on the backoff level lv (default: 1).
+// Higher levels sleep longer with quadratic scaling: Yield(1), Yield(2)=4x, Yield(3)=9x, etc.
+// For automatic adaptive backoff in tight loops, use SpinWait instead.
+func Yield(lv ...int) {
+	d := yieldDuration
+
+	if len(lv) > 0 {
+		d = time.Duration(lv[0]*lv[0]) * yieldDuration
+	}
+	if d > 0 {
+		time.Sleep(d)
+		return
+	}
+	runtime.Gosched()
+}
+
+// SetYieldDuration sets the base duration unit for Yield().
+// Recommended: 50-250 microseconds for real-time systems, 1-4 ms for general workloads.
+func SetYieldDuration(d time.Duration) {
+	yieldDuration = max(0, d)
 }
