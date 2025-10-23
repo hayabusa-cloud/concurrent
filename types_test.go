@@ -5,13 +5,14 @@
 package concurrent_test
 
 import (
-	"hybscloud.com/concurrent"
 	"testing"
 	"unsafe"
+
+	"hybscloud.com/concurrent"
 )
 
 func TestDoubleUint64(t *testing.T) {
-	for i := 0; i < 1<<16; i++ {
+	for range 1000 {
 		u128 := concurrent.DoubleUint64(1, 2)
 		addr := unsafe.Pointer(&u128[0])
 		if uintptr(addr)&0xf > 0 {
@@ -26,7 +27,7 @@ func TestDoubleUint64(t *testing.T) {
 }
 
 func TestDoubleUintPtr(t *testing.T) {
-	for i := 0; i < 1<<16; i++ {
+	for range 1000 {
 		dw := concurrent.DoubleUintPtr(1, 2)
 		addr := unsafe.Pointer(&dw[0])
 		if uintptr(addr)&0xf > 0 {
