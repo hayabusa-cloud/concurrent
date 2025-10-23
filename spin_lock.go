@@ -21,6 +21,7 @@ func (sl *SpinLock) Lock() {
 			return
 		} else if n < 4 {
 			pauseN(defaultPauseCycles)
+			continue
 		}
 		runtime.Gosched()
 	}
