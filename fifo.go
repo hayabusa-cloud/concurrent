@@ -79,13 +79,12 @@ func (q *MPMCQueue[T]) Dequeue() (elem *T, err error) {
 }
 
 // EnqueueWait pushes the given item to a fifo queue.
-// the operation will block until success or error occurred
+// the operation will block until a success or error occurred
 func EnqueueWait[T any](p Producer[T], elem *T) error {
-	sw := SpinWait{}
 	for {
 		err := p.Enqueue(elem)
 		if err == ErrTemporaryUnavailable {
-			sw.Once()
+			Yield()
 			continue
 		}
 
@@ -94,13 +93,12 @@ func EnqueueWait[T any](p Producer[T], elem *T) error {
 }
 
 // DequeueWait pops items from fifo queue.
-// the operation will block until
+// the operation will block until a success or error occurred
 func DequeueWait[T any](c Consumer[T]) (elem *T, err error) {
-	sw := SpinWait{}
 	for {
 		elem, err = c.Dequeue()
 		if err == ErrTemporaryUnavailable {
-			sw.Once()
+			Yield()
 			continue
 		}
 
