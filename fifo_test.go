@@ -10,7 +10,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"hybscloud.com/concurrent"
+	"code.hybscloud.com/concurrent"
 )
 
 func TestQueue(t *testing.T) {

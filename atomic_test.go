@@ -5,8 +5,9 @@
 package concurrent_test
 
 import (
-	"hybscloud.com/concurrent"
 	"testing"
+
+	"code.hybscloud.com/concurrent"
 )
 
 func TestCompareAndSwapUint128(t *testing.T) {

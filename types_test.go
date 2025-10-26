@@ -8,7 +8,7 @@ import (
 	"testing"
 	"unsafe"
 
-	"hybscloud.com/concurrent"
+	"code.hybscloud.com/concurrent"
 )
 
 func TestDoubleUint64(t *testing.T) {
