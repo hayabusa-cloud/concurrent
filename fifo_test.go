@@ -13,6 +13,26 @@ import (
 	"hybscloud.com/concurrent"
 )
 
+func TestQueue(t *testing.T) {
+	t.Run("basic usage", func(t *testing.T) {
+		c, p := concurrent.NewQueue[int](1024)
+		i := 100
+		err := p.Enqueue(&i)
+		if err != nil {
+			t.Errorf("enqueue: %v", err)
+			return
+		}
+		res, err := c.Dequeue()
+		if err != nil {
+			t.Errorf("dequeue: %v", err)
+			return
+		}
+		if *res != 100 {
+			t.Errorf("dequeue expected %v but got %v", i, *res)
+		}
+	})
+}
+
 func TestMPMCQueueRmfLF(t *testing.T) {
 	t.Run("basic usage", func(t *testing.T) {
 		c, p := concurrent.NewMPMCQueue[int](1024)
@@ -134,50 +154,85 @@ func TestMPMCQueueRmfLF(t *testing.T) {
 		}
 	})
 
-	const defaultCapacity = 1 << 14
+	const defaultCapacity = 1 << 8
 	t.Run("1 consumer 1 producer", func(t *testing.T) {
 		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
-		testMPMCQueueRmfLF(t, c, p, 1, 1)
+		testMPMCQueue(t, c, p, 1, 1)
 	})
 
 	t.Run("1 consumer 4 producers", func(t *testing.T) {
 		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
-		testMPMCQueueRmfLF(t, c, p, 1, 4)
+		testMPMCQueue(t, c, p, 1, 4)
 	})
 
 	t.Run("1 consumer 16 producers", func(t *testing.T) {
 		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
-		testMPMCQueueRmfLF(t, c, p, 1, 16)
+		testMPMCQueue(t, c, p, 1, 16)
+	})
+
+	t.Run("1 consumer 64 producers", func(t *testing.T) {
+		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
+		testMPMCQueue(t, c, p, 1, 64)
 	})
 
 	t.Run("4 consumers 1 producer", func(t *testing.T) {
 		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
-		testMPMCQueueRmfLF(t, c, p, 4, 1)
+		testMPMCQueue(t, c, p, 4, 1)
 	})
 
 	t.Run("4 consumers 4 producers", func(t *testing.T) {
 		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
-		testMPMCQueueRmfLF(t, c, p, 4, 4)
+		testMPMCQueue(t, c, p, 4, 4)
 	})
 
 	t.Run("4 consumers 16 producers", func(t *testing.T) {
 		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
-		testMPMCQueueRmfLF(t, c, p, 4, 16)
+		testMPMCQueue(t, c, p, 4, 16)
+	})
+
+	t.Run("4 consumers 64 producers", func(t *testing.T) {
+		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
+		testMPMCQueue(t, c, p, 4, 64)
 	})
 
 	t.Run("16 consumers 1 producer", func(t *testing.T) {
 		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
-		testMPMCQueueRmfLF(t, c, p, 16, 1)
+		testMPMCQueue(t, c, p, 16, 1)
 	})
 
 	t.Run("16 consumers 4 producers", func(t *testing.T) {
 		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
-		testMPMCQueueRmfLF(t, c, p, 16, 4)
+		testMPMCQueue(t, c, p, 16, 4)
 	})
 
 	t.Run("16 consumers 16 producers", func(t *testing.T) {
 		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
-		testMPMCQueueRmfLF(t, c, p, 16, 16)
+		testMPMCQueue(t, c, p, 16, 16)
+	})
+
+	t.Run("16 consumers 64 producers", func(t *testing.T) {
+		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
+		testMPMCQueue(t, c, p, 16, 64)
+	})
+
+	t.Run("64 consumers 1 producer", func(t *testing.T) {
+		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
+		testMPMCQueue(t, c, p, 64, 1)
+	})
+
+	t.Run("64 consumers 4 producers", func(t *testing.T) {
+		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
+		testMPMCQueue(t, c, p, 64, 4)
+	})
+
+	t.Run("64 consumers 16 producers", func(t *testing.T) {
+		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
+		testMPMCQueue(t, c, p, 64, 16)
+	})
+
+	t.Run("64 consumers 64 producers", func(t *testing.T) {
+		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
+		testMPMCQueue(t, c, p, 64, 64)
 	})
 }
 
@@ -186,112 +241,83 @@ func BenchmarkMPMCQueueRmfLF(b *testing.B) {
 
 	b.Run("1 consumer 1 producer", func(b *testing.B) {
 		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
-		benchmarkMPMCQueueRmfLF(b, c, p, 1, 1)
+		benchmarkMPMCQueue(b, c, p, 1, 1)
 	})
 
 	b.Run("1 consumer 4 producers", func(b *testing.B) {
 		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
-		benchmarkMPMCQueueRmfLF(b, c, p, 1, 4)
+		benchmarkMPMCQueue(b, c, p, 1, 4)
 	})
 
 	b.Run("1 consumer 16 producers", func(b *testing.B) {
 		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
-		benchmarkMPMCQueueRmfLF(b, c, p, 1, 16)
+		benchmarkMPMCQueue(b, c, p, 1, 16)
+	})
+
+	b.Run("1 consumer 64 producers", func(b *testing.B) {
+		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
+		benchmarkMPMCQueue(b, c, p, 1, 64)
 	})
 
 	b.Run("4 consumers 1 producer", func(b *testing.B) {
 		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
-		benchmarkMPMCQueueRmfLF(b, c, p, 4, 1)
+		benchmarkMPMCQueue(b, c, p, 4, 1)
 	})
 
 	b.Run("4 consumers 4 producers", func(b *testing.B) {
 		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
-		benchmarkMPMCQueueRmfLF(b, c, p, 4, 4)
+		benchmarkMPMCQueue(b, c, p, 4, 4)
 	})
 
 	b.Run("4 consumers 16 producers", func(b *testing.B) {
 		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
-		benchmarkMPMCQueueRmfLF(b, c, p, 4, 16)
+		benchmarkMPMCQueue(b, c, p, 4, 16)
+	})
+
+	b.Run("4 consumers 64 producers", func(b *testing.B) {
+		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
+		benchmarkMPMCQueue(b, c, p, 4, 64)
 	})
 
 	b.Run("16 consumers 1 producer", func(b *testing.B) {
 		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
-		benchmarkMPMCQueueRmfLF(b, c, p, 16, 1)
+		benchmarkMPMCQueue(b, c, p, 16, 1)
 	})
 
 	b.Run("16 consumers 4 producers", func(b *testing.B) {
 		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
-		benchmarkMPMCQueueRmfLF(b, c, p, 16, 4)
+		benchmarkMPMCQueue(b, c, p, 16, 4)
 	})
 
 	b.Run("16 consumers 16 producers", func(b *testing.B) {
 		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
-		benchmarkMPMCQueueRmfLF(b, c, p, 16, 16)
+		benchmarkMPMCQueue(b, c, p, 16, 16)
 	})
-}
 
-func testMPMCQueueRmfLF(t *testing.T, c concurrent.Consumer[int64], p concurrent.Producer[int64], cn, pn int) {
-	n := 1 << 12
-	for i := 0; i < pn; i++ {
-		go func(i int) {
-			for j := 0; j < n; j++ {
-				val := int64(i<<32) | int64(j)
-				err := concurrent.EnqueueWait[int64](p, &val)
-				if err != nil {
-					t.Errorf("fifo enqueue: %v", err)
-					return
-				}
-			}
-		}(i)
-	}
-	wg := sync.WaitGroup{}
-	for i := 0; i < cn; i++ {
-		wg.Add(1)
-		go func(i int) {
-			last := make([]atomic.Int64, pn)
-			for j := 0; j < pn; j++ {
-				last[j].Store(-1)
-			}
-			for j := 0; j < n*pn/cn; j++ {
-				// Note: False positives for out-of-order detection may occur here, which is acceptable.
-				item, err := concurrent.DequeueWait[int64](c)
-				if err != nil {
-					t.Errorf("fifo dequeue: %v", err)
-					return
-				}
-				high, low := *item>>32, *item&math.MaxUint32
-				old := last[high].Swap(low)
-				if low <= old {
-					t.Logf("ring produce consume out of order: %d>%d", low, old)
-					return
-				}
-			}
-			wg.Done()
-		}(i)
-	}
-	wg.Wait()
-}
+	b.Run("16 consumers 64 producers", func(b *testing.B) {
+		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
+		benchmarkMPMCQueue(b, c, p, 16, 64)
+	})
 
-func benchmarkMPMCQueueRmfLF(b *testing.B, c concurrent.Consumer[int64], p concurrent.Producer[int64], cn, pn int) {
-	for i := 0; i < pn; i++ {
-		go func(i int) {
-			for j := 0; j < (b.N+cn)/pn+1; j++ {
-				val := int64(i<<32) | int64(j)
-				_ = concurrent.EnqueueWait[int64](p, &val)
-			}
-		}(i)
-	}
-	wg := sync.WaitGroup{}
-	for i := 0; i < cn; i++ {
-		wg.Add(1)
-		go func(i int) {
-			for j := 0; j < b.N/cn+1; j++ {
-				_, _ = concurrent.DequeueWait[int64](c)
-			}
-			wg.Done()
-		}(i)
-	}
-	wg.Wait()
+	b.Run("64 consumers 1 producer", func(b *testing.B) {
+		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
+		benchmarkMPMCQueue(b, c, p, 64, 1)
+	})
+
+	b.Run("64 consumers 4 producers", func(b *testing.B) {
+		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
+		benchmarkMPMCQueue(b, c, p, 64, 4)
+	})
+
+	b.Run("64 consumers 16 producers", func(b *testing.B) {
+		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
+		benchmarkMPMCQueue(b, c, p, 64, 16)
+	})
+
+	b.Run("64 consumers 64 producers", func(b *testing.B) {
+		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
+		benchmarkMPMCQueue(b, c, p, 64, 64)
+	})
 }
 
 func TestEnqueueDequeueWait(t *testing.T) {
@@ -339,4 +365,69 @@ func TestEnqueueDequeueWait(t *testing.T) {
 		t.Errorf("dequeue wait expected %v but got %v", e3, *elem)
 		return
 	}
+}
+
+// Test utilities for MPMC queues (interface-based, reusable)
+func testMPMCQueue(t *testing.T, c concurrent.Consumer[int64], p concurrent.Producer[int64], cn, pn int) {
+	n := 1 << 12
+	for i := 0; i < pn; i++ {
+		go func(i int) {
+			for j := 0; j < n; j++ {
+				val := int64(i<<32) | int64(j)
+				err := concurrent.EnqueueWait[int64](p, &val)
+				if err != nil {
+					t.Errorf("queue enqueue: %v", err)
+					return
+				}
+			}
+		}(i)
+	}
+	wg := sync.WaitGroup{}
+	for i := 0; i < cn; i++ {
+		wg.Add(1)
+		go func(i int) {
+			last := make([]atomic.Int64, pn)
+			for j := 0; j < pn; j++ {
+				last[j].Store(-1)
+			}
+			for j := 0; j < n*pn/cn; j++ {
+				// Note: False positives for out-of-order detection may occur here, which is acceptable.
+				item, err := concurrent.DequeueWait[int64](c)
+				if err != nil {
+					t.Errorf("queue dequeue: %v", err)
+					return
+				}
+				high, low := *item>>32, *item&math.MaxUint32
+				old := last[high].Swap(low)
+				if low <= old {
+					t.Logf("queue produce consume out of order: %d>%d", low, old)
+					return
+				}
+			}
+			wg.Done()
+		}(i)
+	}
+	wg.Wait()
+}
+
+func benchmarkMPMCQueue(b *testing.B, c concurrent.Consumer[int64], p concurrent.Producer[int64], cn, pn int) {
+	for i := 0; i < pn; i++ {
+		go func(i int) {
+			for j := 0; j < (b.N+cn)/pn+1; j++ {
+				val := int64(i<<32) | int64(j)
+				_ = concurrent.EnqueueWait[int64](p, &val)
+			}
+		}(i)
+	}
+	wg := sync.WaitGroup{}
+	for i := 0; i < cn; i++ {
+		wg.Add(1)
+		go func(i int) {
+			for j := 0; j < b.N/cn+1; j++ {
+				_, _ = concurrent.DequeueWait[int64](c)
+			}
+			wg.Done()
+		}(i)
+	}
+	wg.Wait()
 }

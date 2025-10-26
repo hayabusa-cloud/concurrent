@@ -78,6 +78,48 @@ func (q *MPMCQueue[T]) Dequeue() (elem *T, err error) {
 	return
 }
 
+// MPMCQueueIndirect represents multiple producers multiple consumers FIFO queue
+// with indirect references
+type MPMCQueueIndirect struct {
+	*rmfLF
+}
+
+// NewMPMCQueueIndirect creates a new multiple producers multiple consumers
+// FIFO queue with the given capacity
+func NewMPMCQueueIndirect(capacity int) (ConsumerIndirect, ProducerIndirect) {
+	if capacity < 2 {
+		panic("bad capacity")
+	}
+	capacity--
+	order := 0
+	for capacity > 0 {
+		order++
+		capacity >>= 1
+	}
+	q := MPMCQueueIndirect{rmfLF: newRmfLF(order)}
+
+	return &q, &q
+}
+
+func (q *MPMCQueueIndirect) Enqueue(elem uintptr) error {
+	ok := q.offer(elem)
+	if !ok {
+		return ErrTemporaryUnavailable
+	}
+
+	return nil
+}
+
+func (q *MPMCQueueIndirect) Dequeue() (elem uintptr, err error) {
+	ptr, ok := q.poll()
+	if !ok {
+		return elem, ErrTemporaryUnavailable
+	}
+	elem = ptr
+
+	return
+}
+
 // EnqueueWait pushes the given item to a fifo queue.
 // the operation will block until a success or error occurred
 func EnqueueWait[T any](p Producer[T], elem *T) error {
