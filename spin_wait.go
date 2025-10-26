@@ -53,7 +53,8 @@ func Yield(lv ...int) {
 	d := yieldDuration
 
 	if len(lv) > 0 {
-		d = time.Duration(lv[0]*lv[0]) * yieldDuration
+		v := max(0, lv[0])
+		d = time.Duration(v*v) * yieldDuration
 	}
 	if d > 0 {
 		time.Sleep(d)
