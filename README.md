@@ -4,7 +4,8 @@ Concurrent is a library of lock-free and wait-free algorithms
 
 ## Environment Requirements
 
-Currently, supports amd64 and arm64 architectures
+- amd64 or arm64 CPU architecture
+- Go 1.25 or later
 
 ## Basic Usages
 
