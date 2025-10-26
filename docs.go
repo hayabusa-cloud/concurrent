@@ -14,23 +14,6 @@ var (
 	ErrTemporaryUnavailable = errors.New("temporary unavailable")
 )
 
-// Pause executes CPU pause instructions to reduce energy consumption in spin-wait loops.
-//
-// Defaults to 20 cycles if not specified. Uses optimized assembly on amd64/arm64.
-//
-// Usage:
-//
-//	Pause()     // 20 cycles (default)
-//	Pause(1)    // 1 cycle
-//	Pause(40)   // 40 cycles
-func Pause(cycles ...int) {
-	n := defaultPauseCycles
-	if len(cycles) > 0 && cycles[0] > 0 {
-		n = cycles[0]
-	}
-	pause(n)
-}
-
 // Producer is the interface that wraps the Enqueue method
 type Producer[T any] interface {
 	// Enqueue pushes item to FIFO queue.
@@ -40,7 +23,7 @@ type Producer[T any] interface {
 
 // Consumer is the interface that wraps the Dequeue method
 type Consumer[T any] interface {
-	// Dequeue pops items from FIFO queue.
+	// Dequeue pops items from the FIFO queue.
 	// if the queue is empty, ErrTemporaryUnavailable will be returned
 	Dequeue() (elem *T, err error)
 }
@@ -48,6 +31,6 @@ type Consumer[T any] interface {
 // Closer is the interface that wraps the Close method
 type Closer interface {
 	// Close closes the queue.
-	// Enqueue and Dequeue operations on a closed queue is undefined
+	// Enqueue and Dequeue operations on a closed queue are undefined
 	Close() error
 }
