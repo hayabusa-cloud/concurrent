@@ -1,4 +1,4 @@
-module hybscloud.com/concurrent
+module code.hybscloud.com/concurrent
 
 go 1.25
 
