@@ -7,6 +7,13 @@ Concurrent is a library of lock-free and wait-free algorithms
 - amd64 or arm64 CPU architecture
 - Go 1.25 or later
 
+## Installation
+
+To install the concurrent library, run the following command:
+```shell
+go get code.hybscloud.com/concurrent
+```
+
 ## Basic Usages
 
 ### Queue (Convenience Constructor)
