@@ -58,6 +58,10 @@ func TestMPMCQueueRmfLF(t *testing.T) {
 			t.Errorf("dequeue expected ErrTemporaryUnavailable but got %v", err)
 			return
 		}
+		if elem != nil {
+			t.Errorf("dequeue expected nil but got %v", elem)
+			return
+		}
 		i0, i1, i2, i3, i4 := 100, 101, 102, 103, 104
 		err = p.Enqueue(&i0)
 		if err != nil {
