@@ -31,6 +31,89 @@ func TestQueue(t *testing.T) {
 			t.Errorf("dequeue expected %v but got %v", i, *res)
 		}
 	})
+	t.Run("with options", func(t *testing.T) {
+		c, p := concurrent.NewQueue[int](16, func(opts *concurrent.QueueOptions) {
+			opts.DistinctValues = true
+		})
+		val := 100
+		err := concurrent.EnqueueWait(p, &val)
+		if err != nil {
+			t.Errorf("Enqueue failed: %v", err)
+		}
+
+		result, err := concurrent.DequeueWait(c)
+		if err != nil {
+			t.Errorf("Dequeue failed: %v", err)
+		}
+		if *result != 100 {
+			t.Errorf("Expected 100, got %d", *result)
+		}
+	})
+	t.Run("with invalid options", func(t *testing.T) {
+		defer func() {
+			if r := recover(); r == nil {
+				t.Error("Expected panic for invalid options")
+			}
+		}()
+		_, _ = concurrent.NewQueue[int](16, func(opts *concurrent.QueueOptions) {
+			opts.DistinctValues = false
+		})
+	})
+}
+
+func TestSPSCQueue(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("expected not implement panic")
+		}
+	}()
+	c, p := concurrent.NewSPSCQueue[int](8)
+	if c == nil || p == nil {
+		t.Error("NewSPSCQueue returned nil")
+	}
+}
+
+func TestMPSCQueue(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("expected not implement panic")
+		}
+	}()
+	c, p := concurrent.NewMPSCQueue[int](8)
+	if c == nil || p == nil {
+		t.Error("NewMPSCQueue returned nil")
+	}
+}
+
+func TestSPMCQueue(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("expected not implement panic")
+		}
+	}()
+	c, p := concurrent.NewSPMCQueue[int](8)
+	if c == nil || p == nil {
+		t.Error("NewSPMCQueue returned nil")
+	}
+}
+
+func TestMPMCQueueInvalidOrder(t *testing.T) {
+	t.Run("too small order", func(t *testing.T) {
+		defer func() {
+			if r := recover(); r == nil {
+				t.Error("Expected panic for capacity < 2")
+			}
+		}()
+		concurrent.NewMPMCQueue[int](1)
+	})
+	t.Run("too large order", func(t *testing.T) {
+		defer func() {
+			if r := recover(); r == nil {
+				t.Error("Expected panic for too large capacity")
+			}
+		}()
+		concurrent.NewMPMCQueue[int]((1 << 30) + 1)
+	})
 }
 
 func TestMPMCQueueRmfLF(t *testing.T) {
@@ -51,6 +134,16 @@ func TestMPMCQueueRmfLF(t *testing.T) {
 			t.Errorf("dequeue expected %v but got %v", i, *res)
 		}
 	})
+
+	t.Run("invalid order", func(t *testing.T) {
+		defer func() {
+			if r := recover(); r == nil {
+				t.Error("Expected panic for capacity < 2")
+			}
+		}()
+		concurrent.NewMPMCQueue[int](1)
+	})
+
 	t.Run("simple enqueue dequeue", func(t *testing.T) {
 		c, p := concurrent.NewMPMCQueue[int](4)
 		elem, err := c.Dequeue()
@@ -83,7 +176,7 @@ func TestMPMCQueueRmfLF(t *testing.T) {
 			t.Errorf("enqueue: %v", err)
 			return
 		}
-		err = p.Enqueue(&i4)
+		err = p.Enqueue(&i4) // full
 		if err != concurrent.ErrTemporaryUnavailable {
 			t.Errorf("enqueue expected ErrTemporaryUnavailable but got %v", err)
 			return
@@ -237,6 +330,63 @@ func TestMPMCQueueRmfLF(t *testing.T) {
 	t.Run("64 consumers 64 producers", func(t *testing.T) {
 		c, p := concurrent.NewMPMCQueue[int64](defaultCapacity)
 		testMPMCQueue(t, c, p, 64, 64)
+	})
+}
+
+func TestMPMCQueueIndirect(t *testing.T) {
+	t.Run("basic usage", func(t *testing.T) {
+		c, p := concurrent.NewMPMCQueueIndirect(256)
+
+		index := uintptr(42)
+		err := p.Enqueue(index)
+		if err != nil {
+			t.Errorf("Enqueue failed: %v", err)
+		}
+
+		index2 := uintptr(99)
+		err = p.Enqueue(index2)
+		if err != nil {
+			t.Errorf("Enqueue failed: %v", err)
+		}
+
+		value, err := c.Dequeue()
+		if err != nil {
+			t.Errorf("Dequeue failed: %v", err)
+		}
+		if value != uintptr(42) {
+			t.Errorf("Expected 42, got %d", value)
+		}
+
+		value2, err := c.Dequeue()
+		if err != nil {
+			t.Errorf("Dequeue failed: %v", err)
+		}
+		if value2 != uintptr(99) {
+			t.Errorf("Expected 99, got %d", value2)
+		}
+
+		_, err = c.Dequeue()
+		if err == nil {
+			t.Error("Expected error on empty queue")
+		}
+	})
+
+	t.Run("invalid capacity", func(t *testing.T) {
+		defer func() {
+			if r := recover(); r == nil {
+				t.Error("Expected panic on invalid capacity")
+			}
+		}()
+		_, _ = concurrent.NewMPMCQueueIndirect(1)
+	})
+
+	t.Run("too large capacity", func(t *testing.T) {
+		defer func() {
+			if r := recover(); r == nil {
+				t.Error("Expected panic on invalid capacity")
+			}
+		}()
+		_, _ = concurrent.NewMPMCQueueIndirect(1 << 31)
 	})
 }
 
