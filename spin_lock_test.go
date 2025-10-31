@@ -2,7 +2,7 @@
 // Use of this source code is governed by a MIT-style
 // license that can be found in the LICENSE file.
 
-package concurrent
+package concurrent_test
 
 import (
 	"runtime"
@@ -10,11 +10,13 @@ import (
 	"sync/atomic"
 	"testing"
 	"time"
+
+	"code.hybscloud.com/concurrent"
 )
 
 // TestSpinLock_BasicLockUnlock tests basic lock and unlock operations
 func TestSpinLock_BasicLockUnlock(t *testing.T) {
-	var sl SpinLock
+	var sl concurrent.SpinLock
 
 	// Lock and unlock should not panic
 	sl.Lock()
@@ -27,7 +29,7 @@ func TestSpinLock_BasicLockUnlock(t *testing.T) {
 
 // TestSpinLock_MutualExclusion tests that the lock provides mutual exclusion
 func TestSpinLock_MutualExclusion(t *testing.T) {
-	var sl SpinLock
+	var sl concurrent.SpinLock
 	var counter int64
 	var wg sync.WaitGroup
 
@@ -56,7 +58,7 @@ func TestSpinLock_MutualExclusion(t *testing.T) {
 
 // TestSpinLock_ConcurrentAccess tests concurrent lock/unlock operations
 func TestSpinLock_ConcurrentAccess(t *testing.T) {
-	var sl SpinLock
+	var sl concurrent.SpinLock
 	var wg sync.WaitGroup
 	var activeHolders atomic.Int32
 	var maxConcurrent atomic.Int32
@@ -96,7 +98,7 @@ func TestSpinLock_ConcurrentAccess(t *testing.T) {
 
 // TestSpinLock_HighContention tests the lock under high contention
 func TestSpinLock_HighContention(t *testing.T) {
-	var sl SpinLock
+	var sl concurrent.SpinLock
 	var wg sync.WaitGroup
 	var operations atomic.Int64
 
@@ -134,7 +136,7 @@ func TestSpinLock_HighContention(t *testing.T) {
 
 // TestSpinLock_MultipleLocksUnlocks tests multiple sequential lock/unlock cycles
 func TestSpinLock_MultipleLocksUnlocks(t *testing.T) {
-	var sl SpinLock
+	var sl concurrent.SpinLock
 
 	iterations := 10000
 	for i := 0; i < iterations; i++ {
@@ -145,7 +147,7 @@ func TestSpinLock_MultipleLocksUnlocks(t *testing.T) {
 
 // TestSpinLock_WithDeferredUnlock tests using defer for unlock
 func TestSpinLock_WithDeferredUnlock(t *testing.T) {
-	var sl SpinLock
+	var sl concurrent.SpinLock
 	var counter int
 
 	func() {
@@ -164,9 +166,9 @@ func TestSpinLock_WithDeferredUnlock(t *testing.T) {
 	}
 }
 
-// TestSpinLock_ProtectedSection tests that critical section is properly protected
+// TestSpinLock_ProtectedSection tests that a critical section is properly protected
 func TestSpinLock_ProtectedSection(t *testing.T) {
-	var sl SpinLock
+	var sl concurrent.SpinLock
 	var wg sync.WaitGroup
 	var sharedSlice []int
 
@@ -192,7 +194,7 @@ func TestSpinLock_ProtectedSection(t *testing.T) {
 
 // BenchmarkSpinLock_LockUnlock benchmarks basic lock/unlock operations
 func BenchmarkSpinLock_LockUnlock(b *testing.B) {
-	var sl SpinLock
+	var sl concurrent.SpinLock
 
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
@@ -204,7 +206,7 @@ func BenchmarkSpinLock_LockUnlock(b *testing.B) {
 
 // BenchmarkSpinLock_WithWork benchmarks lock/unlock with simulated work
 func BenchmarkSpinLock_WithWork(b *testing.B) {
-	var sl SpinLock
+	var sl concurrent.SpinLock
 	var counter int64
 
 	b.RunParallel(func(pb *testing.PB) {
@@ -218,7 +220,7 @@ func BenchmarkSpinLock_WithWork(b *testing.B) {
 
 // BenchmarkSpinLock_HighContention benchmarks under high contention
 func BenchmarkSpinLock_HighContention(b *testing.B) {
-	var sl SpinLock
+	var sl concurrent.SpinLock
 	var counter int64
 
 	b.SetParallelism(runtime.NumCPU() * 2)
@@ -234,7 +236,7 @@ func BenchmarkSpinLock_HighContention(b *testing.B) {
 
 // BenchmarkSpinLock_LowContention benchmarks under low contention
 func BenchmarkSpinLock_LowContention(b *testing.B) {
-	var sl SpinLock
+	var sl concurrent.SpinLock
 
 	b.SetParallelism(1)
 	b.RunParallel(func(pb *testing.PB) {
@@ -248,7 +250,7 @@ func BenchmarkSpinLock_LowContention(b *testing.B) {
 // BenchmarkSpinLock_vs_Mutex compares SpinLock with standard Mutex
 func BenchmarkSpinLock_vs_Mutex(b *testing.B) {
 	b.Run("SpinLock", func(b *testing.B) {
-		var sl SpinLock
+		var sl concurrent.SpinLock
 		b.RunParallel(func(pb *testing.PB) {
 			for pb.Next() {
 				sl.Lock()
