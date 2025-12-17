@@ -2,6 +2,9 @@
 // Use of this source code is governed by a MIT-style
 // license that can be found in the LICENSE file.
 
+//go:build amd64
+// +build amd64
+
 #include "textflag.h"
 
 // void And64(ptr *uint64, val uint64)
