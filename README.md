@@ -1,5 +1,10 @@
 ## concurrent
 
+[![Go Reference](https://pkg.go.dev/badge/code.hybscloud.com/concurrent.svg)](https://pkg.go.dev/code.hybscloud.com/concurrent)
+[![Go Report Card](https://goreportcard.com/badge/github.com/hayabusa-cloud/concurrent)](https://goreportcard.com/report/github.com/hayabusa-cloud/concurrent)
+[![Coverage Status](https://codecov.io/gh/hayabusa-cloud/concurrent/graph/badge.svg)](https://codecov.io/gh/hayabusa-cloud/concurrent)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 Concurrent is a library of lock-free and wait-free algorithms 
 
 ## Environment Requirements
