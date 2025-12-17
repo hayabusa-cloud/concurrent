@@ -18,6 +18,7 @@ jobs:
       matrix:
         target:
           - { runs-on: ubuntu-latest, goos: linux, goarch: amd64 }
+          - { runs-on: macos-latest, goos: darwin, goarch: arm64 }
 
     steps:
       - name: Checkout
